@@ -1,16 +1,23 @@
 package com.nullist.finbox.domain
 
-internal class FakeFinboxRepository : FinboxRepository {
-    private val directories = mutableListOf<InboxDirectory>()
+import com.nullist.finbox.domain.service.FinboxRepository
 
-    override val finbox: Finbox
-        get() = Finbox(directories.flatMap { it.files })
+internal class FakeFinboxRepository(
+    inboxFiles: List<InboxFile> = emptyList(),
+    inboxDirectories: List<InboxDirectory> = emptyList(),
+): FinboxRepository {
+    private val mutableInboxFiles = inboxFiles.toMutableList()
+    private val mutableInboxDirectories = inboxDirectories.toMutableList()
 
-    override fun addDirectory(directory: InboxDirectory) {
-        directories += directory
+    override suspend fun getInboxFiles(): List<InboxFile> = mutableInboxFiles
+
+    override suspend fun getInboxDirectories(): List<InboxDirectory> = mutableInboxDirectories
+
+    override suspend fun deleteDirectory(directory: InboxDirectory) {
+        mutableInboxDirectories.remove(directory)
     }
 
-    override fun removeDirectory(directory: InboxDirectory) {
-        directories -= directory
+    override suspend fun deleteFile(file: InboxFile) {
+        mutableInboxFiles.remove(file)
     }
 }
