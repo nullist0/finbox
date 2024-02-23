@@ -1,13 +1,40 @@
 package com.nullist.finbox.domain
 
-open class InboxFile protected constructor(
-    open val name: String
-)
+import java.io.File
 
-data class TemporaryInboxFile(
-    override val name: String
-): InboxFile(name)
+abstract class InboxFile: Model() {
+    abstract val name: String
+    abstract val path: String
 
-data class PermanentInboxFile(
-    override val name: String
-): InboxFile(name)
+    data class Temporary(
+        override val name: String,
+        override val path: String,
+    ) : InboxFile() {
+        fun toPermanent(): Permanent = Permanent(
+            name = name,
+            path = path,
+        )
+
+        companion object {
+            fun from(file: File): Temporary = Temporary(file.name, file.path)
+        }
+    }
+
+    data class Permanent(
+        override val name: String,
+        override val path: String,
+    ) : InboxFile() {
+        fun toTemporary(): Temporary = Temporary(
+            name = name,
+            path = path,
+        )
+
+        companion object {
+            fun from(file: File): Temporary = Temporary(file.name, file.path)
+        }
+    }
+
+    companion object {
+        fun from(file: File) : InboxFile = Temporary.from(file)
+    }
+}
